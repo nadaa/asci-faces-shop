@@ -1,0 +1,8 @@
+.product-div {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.product-div > div {
+  padding: 1em;
+}
