@@ -7,27 +7,58 @@ class App extends Component {
     super(props);
     this.state = {
       products: [],
-      limit: 15,
+      limit: 20,
       numPages: 1,
       loading: false,
-      scrolling: false,
       end: false
     };
     this.fetchProducts = this.fetchProducts.bind(this);
     this.handleScroll = this.handleScroll.bind(this);
+    this.sortProducts = this.sortProducts.bind(this);
+    this.dateFormat = this.dateFormat.bind(this);
+  }
+
+  componentDidMount() {
+    this.fetchProducts();
+    window.addEventListener("scroll", e => {
+      this.handleScroll(e);
+    });
+  }
+
+  dateFormat(d) {
+    const weekMs = 7 * 24 * 60 * 60 * 1000;
+    const currDate = Date.now();
+    const productDate = Date.parse(d);
+    const diff = currDate - productDate;
+    if (diff < weekMs) {
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      return `${days} days ago`;
+    } else {
+      return d;
+    }
+  }
+
+  sortProducts(e) {
+    this.setState({ products: [] });
+    const field = e.target.id;
+    Api()
+      .get(`/api/products?_sort=${field}`)
+      .then(response => {
+        this.setState({
+          products: response.data
+        });
+      });
   }
 
   fetchProducts() {
+    const url = `/api/products?_page=${this.state.numPages}&_limit=${
+      this.state.limit
+    }`;
     this.setState({ loading: true });
     setTimeout(
       () =>
         Api()
-          .get(
-            `/api/products?_page=${this.state.numPages}&_limit=${
-              this.state.limit
-            }
-            }`
-          )
+          .get(url)
           .then(response => {
             if (response.data.length === 0) {
               this.setState({
@@ -42,13 +73,6 @@ class App extends Component {
           }),
       1000
     );
-  }
-
-  componentDidMount() {
-    this.fetchProducts();
-    window.addEventListener("scroll", e => {
-      this.handleScroll(e);
-    });
   }
 
   handleScroll(e) {
@@ -81,9 +105,27 @@ class App extends Component {
         <div className="main-div">
           <div>
             <h1>Soring</h1>
-            Id: <input name="sort" type="radio" />
-            Price: <input name="sort" type="radio" />
-            Size: <input name="sort" type="radio" />
+            Id:
+            <input
+              name="sortProd"
+              type="radio"
+              id="id"
+              onChange={this.sortProducts}
+            />
+            Price:
+            <input
+              name="sortProd"
+              type="radio"
+              id="price"
+              onChange={this.sortProducts}
+            />
+            Size:
+            <input
+              name="sortProd"
+              type="radio"
+              id="size"
+              onChange={this.sortProducts}
+            />
           </div>
           <div>
             <p>{this.state.loading ? "Loading ..." : ""}</p>
@@ -102,7 +144,7 @@ class App extends Component {
                   </div>
                   <div className="date-div">
                     <b>Date: </b>
-                    {prod.date}
+                    {this.dateFormat(prod.date)}
                   </div>
                 </div>
               );
