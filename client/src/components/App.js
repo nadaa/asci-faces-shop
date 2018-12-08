@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import Product from "./Product";
 import Api from "../services/Api";
 import "./app.css";
+//import Ads from "./Ads";
 class App extends Component {
   constructor(props) {
     super(props);
@@ -10,7 +11,8 @@ class App extends Component {
       limit: 20,
       numPages: 1,
       loading: false,
-      end: false
+      end: false,
+      ads: false
     };
     this.fetchProducts = this.fetchProducts.bind(this);
     this.handleScroll = this.handleScroll.bind(this);
@@ -65,11 +67,16 @@ class App extends Component {
                 end: true
               });
             }
-            this.setState({
-              products: this.state.products.concat(response.data),
-              loading: false,
-              numPages: this.state.numPages + 1
-            });
+            this.setState(
+              {
+                products: this.state.products.concat(response.data),
+                loading: false,
+                numPages: this.state.numPages + 1
+              },
+              () => {
+                this.setState({ ads: true });
+              }
+            );
           }),
       1000
     );
@@ -131,29 +138,53 @@ class App extends Component {
             <p>{this.state.loading ? "Loading ..." : ""}</p>
           </div>
           <div className="products-div">
-            {this.state.products.map(prod => {
-              return (
-                <div className="product-div" key="prod.id">
-                  <div className="face-div">{prod.face}</div>
-                  <div className="price-div">
-                    <b>Price: </b>${prod.price}
+            {this.state.products.map((prod, i) => {
+              const product =
+                (i + 1) % 20 === 0 ? (
+                  <React.Fragment>
+                    <div className="product-div" key="prod.id">
+                      <div className="face-div">{prod.face}</div>
+                      <div className="price-div">
+                        <b>Price: </b>${prod.price}
+                      </div>
+                      <div className="size-div">
+                        <b>Size: </b>
+                        {prod.size}px
+                      </div>
+                      <div className="date-div">
+                        <b>Date: </b>
+                        {this.dateFormat(prod.date)}
+                      </div>
+                    </div>
+                    <img
+                      className="img-ads"
+                      src={`http://localhost:3000/ads/?r=${Math.floor(
+                        Math.random() * 1000
+                      )}`}
+                    />
+                  </React.Fragment>
+                ) : (
+                  <div className="product-div" key="prod.id">
+                    <div className="face-div">{prod.face}</div>
+                    <div className="price-div">
+                      <b>Price: </b>${prod.price}
+                    </div>
+                    <div className="size-div">
+                      <b>Size: </b>
+                      {prod.size}px
+                    </div>
+                    <div className="date-div">
+                      <b>Date: </b>
+                      {this.dateFormat(prod.date)}
+                    </div>
                   </div>
-                  <div className="size-div">
-                    <b>Size: </b>
-                    {prod.size}px
-                  </div>
-                  <div className="date-div">
-                    <b>Date: </b>
-                    {this.dateFormat(prod.date)}
-                  </div>
-                </div>
-              );
+                );
+              return product;
               // <Product p={prod} />;
             })}
-          </div>
-          <div>
             <p>{this.state.end ? "End of Products ..." : ""}</p>
           </div>
+          <div>Ads</div>
         </div>
       </div>
     );

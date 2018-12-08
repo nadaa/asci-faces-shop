@@ -39,3 +39,9 @@
 .date-div {
   grid-column: 1/5;
 }
+
+.img-ads {
+  grid-column: 1/6;
+  display: block;
+  margin: auto;
+}
