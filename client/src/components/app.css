@@ -18,26 +18,17 @@
   padding: 1em;
 }
 
-/* product stryle */
-.product-div {
+.sort-div {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-  grid-gap: 1em;
-}
-.face-div {
-  grid-column: 1/5;
-}
-
-.price-div {
-  grid-column: 1/3;
+  grid-template-columns: repeat(3, 1fr);
+  width: 200px;
+  margin: auto;
+  color: white;
+  font-size: 20px;
 }
 
-.size-div {
-  grid-column: 3/5;
-}
-
-.date-div {
-  grid-column: 1/5;
+.sort-head {
+  padding-left: 20px;
 }
 
 .img-ads {

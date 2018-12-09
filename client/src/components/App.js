@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import Product from "./Product";
 import Api from "../services/Api";
 import "./app.css";
-//import Ads from "./Ads";
+
 class App extends Component {
   constructor(props) {
     super(props);
@@ -11,33 +11,18 @@ class App extends Component {
       limit: 20,
       numPages: 1,
       loading: false,
-      end: false,
-      ads: false
+      end: false
     };
     this.fetchProducts = this.fetchProducts.bind(this);
     this.handleScroll = this.handleScroll.bind(this);
     this.sortProducts = this.sortProducts.bind(this);
-    this.dateFormat = this.dateFormat.bind(this);
   }
 
   componentDidMount() {
     this.fetchProducts();
-    window.addEventListener("scroll", e => {
-      this.handleScroll(e);
+    window.addEventListener("scroll", () => {
+      this.handleScroll();
     });
-  }
-
-  dateFormat(d) {
-    const weekMs = 7 * 24 * 60 * 60 * 1000;
-    const currDate = Date.now();
-    const productDate = Date.parse(d);
-    const diff = currDate - productDate;
-    if (diff < weekMs) {
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      return `${days} days ago`;
-    } else {
-      return d;
-    }
   }
 
   sortProducts(e) {
@@ -57,32 +42,24 @@ class App extends Component {
       this.state.limit
     }`;
     this.setState({ loading: true });
-    setTimeout(
-      () =>
-        Api()
-          .get(url)
-          .then(response => {
-            if (response.data.length === 0) {
-              this.setState({
-                end: true
-              });
-            }
-            this.setState(
-              {
-                products: this.state.products.concat(response.data),
-                loading: false,
-                numPages: this.state.numPages + 1
-              },
-              () => {
-                this.setState({ ads: true });
-              }
-            );
-          }),
-      1000
-    );
+
+    Api()
+      .get(url)
+      .then(response => {
+        if (response.data.length === 0) {
+          this.setState({
+            end: true
+          });
+        }
+        this.setState({
+          products: this.state.products.concat(response.data),
+          loading: false,
+          numPages: this.state.numPages + 1
+        });
+      });
   }
 
-  handleScroll(e) {
+  handleScroll() {
     if (
       window.innerHeight + document.documentElement.scrollTop ===
       document.documentElement.offsetHeight
@@ -95,7 +72,7 @@ class App extends Component {
     return (
       <div>
         <header>
-          <h1>Products Grid</h1>
+          <h1>Ascii Faces Shop</h1>
           <p>
             Here you're sure to find a bargain on some of the finest ascii
             available to purchase. Be sure to peruse our selection of ascii
@@ -109,24 +86,26 @@ class App extends Component {
             )}`}
           />
         </header>
+        <br /> <br />
+        <h2 style={{ textAlign: "center" }}>SortBy</h2>
         <div className="main-div">
-          <div>
-            <h1>Soring</h1>
-            Id:
+          <div className="sort-div">
+            <div className="sort-head">Id</div>
+            <div className="sort-head"> Price</div>
+            <div className="sort-head">Size</div>
             <input
               name="sortProd"
               type="radio"
               id="id"
               onChange={this.sortProducts}
             />
-            Price:
             <input
               name="sortProd"
               type="radio"
               id="price"
               onChange={this.sortProducts}
             />
-            Size:
+
             <input
               name="sortProd"
               type="radio"
@@ -141,21 +120,8 @@ class App extends Component {
             {this.state.products.map((prod, i) => {
               const product =
                 (i + 1) % 20 === 0 ? (
-                  <React.Fragment>
-                    <div className="product-div" key="prod.id">
-                      <div className="face-div">{prod.face}</div>
-                      <div className="price-div">
-                        <b>Price: </b>${prod.price}
-                      </div>
-                      <div className="size-div">
-                        <b>Size: </b>
-                        {prod.size}px
-                      </div>
-                      <div className="date-div">
-                        <b>Date: </b>
-                        {this.dateFormat(prod.date)}
-                      </div>
-                    </div>
+                  <React.Fragment key={i}>
+                    <Product prod={prod} />
                     <img
                       className="img-ads"
                       src={`http://localhost:3000/ads/?r=${Math.floor(
@@ -164,27 +130,12 @@ class App extends Component {
                     />
                   </React.Fragment>
                 ) : (
-                  <div className="product-div" key="prod.id">
-                    <div className="face-div">{prod.face}</div>
-                    <div className="price-div">
-                      <b>Price: </b>${prod.price}
-                    </div>
-                    <div className="size-div">
-                      <b>Size: </b>
-                      {prod.size}px
-                    </div>
-                    <div className="date-div">
-                      <b>Date: </b>
-                      {this.dateFormat(prod.date)}
-                    </div>
-                  </div>
+                  <Product prod={prod} key={i} />
                 );
               return product;
-              // <Product p={prod} />;
             })}
-            <p>{this.state.end ? "End of Products ..." : ""}</p>
+            <div>{this.state.end ? "End of Products ..." : ""}</div>
           </div>
-          <div>Ads</div>
         </div>
       </div>
     );
