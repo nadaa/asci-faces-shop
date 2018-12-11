@@ -11,11 +11,31 @@ class App extends Component {
       limit: 20,
       numPages: 1,
       loading: false,
-      end: false
+      end: false,
+      caching: []
     };
     this.fetchProducts = this.fetchProducts.bind(this);
     this.handleScroll = this.handleScroll.bind(this);
     this.sortProducts = this.sortProducts.bind(this);
+    this.fillData = this.fillData.bind(this);
+  }
+
+  fillData() {
+    const url = `/api/products?_page=${this.state.numPages}&_limit=${
+      this.state.limit
+    }`;
+    Api()
+      .get(url)
+      .then(response => {
+        if (response.data.length === 0) {
+          this.setState({
+            end: true
+          });
+        }
+        this.setState({
+          caching: response.data
+        });
+      });
   }
 
   componentDidMount() {
@@ -51,11 +71,14 @@ class App extends Component {
             end: true
           });
         }
-        this.setState({
-          products: this.state.products.concat(response.data),
-          loading: false,
-          numPages: this.state.numPages + 1
-        });
+        this.setState(
+          {
+            products: this.state.products.concat(response.data),
+            loading: false,
+            numPages: this.state.numPages + 1
+          },
+          this.fillData
+        );
       });
   }
 
@@ -64,7 +87,12 @@ class App extends Component {
       window.innerHeight + document.documentElement.scrollTop ===
       document.documentElement.offsetHeight
     ) {
-      this.fetchProducts();
+      this.setState(
+        {
+          products: this.state.products.concat(this.state.caching)
+        },
+        this.fillData
+      );
     }
   }
 
@@ -134,7 +162,7 @@ class App extends Component {
                 );
               return product;
             })}
-            <div>{this.state.end ? "End of Products ..." : ""}</div>
+            <div>{this.state.end ? "~ end of catalogue ~" : ""}</div>
           </div>
         </div>
       </div>
